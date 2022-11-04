@@ -80,6 +80,7 @@ pub fn can_cast_types(from_type: &DataType, to_type: &DataType) -> bool {
         return true;
     }
 
+    println!("From {} to {}", from_type, to_type);
     match (from_type, to_type) {
         // TODO UTF8/unsigned numeric to decimal
         // cast one decimal type to another decimal type
