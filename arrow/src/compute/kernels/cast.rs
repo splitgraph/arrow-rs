@@ -503,6 +503,20 @@ pub fn cast_with_options(
         return Ok(array.clone());
     }
     match (from_type, to_type) {
+        (Date64, Timestamp(TimeUnit::Millisecond, None)) => {
+            cast_reinterpret_arrays::<Date64Type, TimestampMillisecondType>(array)
+        }
+        (Date64, Timestamp(TimeUnit::Microsecond, None)) => Ok(Arc::new(
+            as_primitive_array::<Date64Type>(array).unary::<_, TimestampMicrosecondType>(
+                |x| x * (MICROSECONDS / MILLISECONDS),
+            ),
+        )),
+        (Date64, Timestamp(TimeUnit::Nanosecond, None)) => Ok(Arc::new(
+            as_primitive_array::<Date64Type>(array).unary::<_, TimestampNanosecondType>(
+                |x| x * (NANOSECONDS / MILLISECONDS),
+            ),
+        )),
+        // date64 to other timestamp conversions might not make sense
         (Decimal128(_, s1), Decimal128(p2, s2)) => {
             cast_decimal_to_decimal::<16, 16>(array, s1, p2, s2)
         }
@@ -1362,21 +1376,6 @@ pub fn cast_with_options(
             as_primitive_array::<TimestampNanosecondType>(array)
                 .unary::<_, Date64Type>(|x| x / (NANOSECONDS / MILLISECONDS)),
         )),
-
-        (Date64, Timestamp(TimeUnit::Millisecond, None)) => {
-            cast_reinterpret_arrays::<Date64Type, TimestampMillisecondType>(array)
-        }
-        (Date64, Timestamp(TimeUnit::Microsecond, None)) => Ok(Arc::new(
-            as_primitive_array::<Date64Type>(array).unary::<_, TimestampMicrosecondType>(
-                |x| x * (MICROSECONDS / MILLISECONDS),
-            ),
-        )),
-        (Date64, Timestamp(TimeUnit::Nanosecond, None)) => Ok(Arc::new(
-            as_primitive_array::<Date64Type>(array).unary::<_, TimestampNanosecondType>(
-                |x| x * (NANOSECONDS / MILLISECONDS),
-            ),
-        )),
-        // date64 to other timestamp conversions might not make sense
         (Int64, Duration(TimeUnit::Second)) => {
             cast_reinterpret_arrays::<Int64Type, DurationSecondType>(array)
         }
