@@ -253,7 +253,13 @@ pub fn can_cast_types(from_type: &DataType, to_type: &DataType) -> bool {
         (Timestamp(_, _), Int64) => true,
         (Int64, Timestamp(_, _)) => true,
         (Timestamp(_, _), Timestamp(_, _) | Date32 | Date64) => true,
-        // date64 to timestamp might not make sense,
+        (
+            Date64,
+            Timestamp(TimeUnit::Millisecond, None)
+            | Timestamp(TimeUnit::Microsecond, None)
+            | Timestamp(TimeUnit::Nanosecond, None)
+        ) => true,
+        // date64 to other timestamps might not make sense,
         (Int64, Duration(_)) => true,
         (Duration(_), Int64) => true,
         (Interval(from_type), Int64) => {
